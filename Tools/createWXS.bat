@@ -1,0 +1,1 @@
+heat dir Tomcat -cg TomcatComponent -var var.SrcDir -ke -gg -o tc.wxs
