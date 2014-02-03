@@ -57,4 +57,15 @@
 	<Target Name="AfterBuild">
 	</Target>
 	-->
+  <Target Name="BeforeBuild">
+    <CreateProperty Value="$(OutputName)_$(Platform)">
+      <Output TaskParameter="Value" PropertyName="TargetName"/>
+    </CreateProperty>
+    <CreateProperty Value="$(TargetName)$(TargetExt)">
+      <Output TaskParameter="Value" PropertyName="TargetFileName"/>
+    </CreateProperty>
+    <CreateProperty Value="$(TargetDir)$(TargetFileName)">
+      <Output TaskParameter="Value" PropertyName="TargetPath"/>
+    </CreateProperty>
+  </Target>
 </Project>

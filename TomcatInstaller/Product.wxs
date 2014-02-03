@@ -28,14 +28,58 @@
     <UIRef Id="WixUI_InstallDir" />
     <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
     <Property Id="ARPPRODUCTICON" Value="TomcatIcon.ico" />
+    <Property Id="HTTPPORT" Value="8080" />
+    <Property Id="JREPATH" Value="TARGETJREPATH" />
     <UI>
       <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
-      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg" Order="2">1</Publish>
-      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">1</Publish>
+      <Dialog Id="ErrorsDlg" Width="270" Height="70" Title="Error" NoMinimize="yes">
+        <Control Id="ServerLabel" Type="Text" X="75" Y="23" Width="140" Height="15" TabSkip="no"
+                 Text="Enter parameters!" />
+        <Control Id="OK" Type="PushButton" X="204" Y="43" Width="56" Height="17" Cancel="yes" Text="OK">
+          <Publish Event="EndDialog" Value="Return">1</Publish>
+        </Control>
+      </Dialog>
+      <Dialog Id="ParamDlg" Width="370" Height="270" Title="[ProductName] Setup" NoMinimize="yes">
+        <Control Id="PortLabel" Type="Text" X="55" Y="53" Width="100" Height="15" TabSkip="no"
+                 Text="HTTP/1.1 Connector port:" />
+        <Control Id="PortEdit" Type="Edit" X="55" Y="65" Width="280" Height="18" Property="HTTPPORT" Text="[HTTPPORT]" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Back">
+          <Publish Event="NewDialog" Value="WelcomeDlg">1</Publish>
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Next">
+          <Publish Event="SpawnDialog" Value="ErrorsDlg" Order="1"><![CDATA[HTTPPORT = ""]]></Publish>
+          <Publish Property="_BrowseProperty" Value="[JREPATH]" Order="2"><![CDATA[HTTPPORT <> ""]]></Publish>
+          <Publish Event="NewDialog" Value="JrePathDlg" Order="3"><![CDATA[HTTPPORT <> ""]]></Publish>
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+      </Dialog>
+      <Dialog Id="JrePathDlg" Width="370" Height="270" Title="[ProductName] Setup" NoMinimize="yes">
+        <Control Id="JreLabel" Type="Text" X="55" Y="53" Width="280" Height="15" TabSkip="no"
+                 Text="Please select the path of Java SE 6.0  or later JRE installed on your system:" />
+        <Control Id="Folder" Type="PathEdit" X="55" Y="65" Width="260" Height="18" Property="_BrowseProperty"
+                 Indirect="yes" />
+        <Control Id="Browse" Type="PushButton" X="315" Y="65" Width="20" Height="18" Text="..." />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Back">
+          <Publish Event="NewDialog" Value="ParamDlg">1</Publish>
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Next">
+          <Publish Event="SpawnDialog" Value="ErrorsDlg" Order="1"><![CDATA[JREPATH = ""]]></Publish>
+          <Publish Event="NewDialog" Value="InstallDirDlg" Order="2"><![CDATA[JREPATH <> ""]]></Publish>
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+        </Control>
+      </Dialog>
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="ParamDlg" Order="2">1</Publish>
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="JrePathDlg" Order="2">1</Publish>
+      <Publish Dialog="JrePathDlg" Control="Browse" Property="_BrowseProperty" Value="[JREPATH]" Order="1">1</Publish>
+      <Publish Dialog="JrePathDlg" Control="Browse" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
     </UI>
     <CustomAction Id="InstallService1"
                   FileKey="filC9AB73E4B36E50858FBDFA360FC9AD8D"
-                  ExeCommand='//IS//Tomcat7 --DisplayName "$(var.ProductName)" --Description "Apache Tomcat 7.0.50 Server - http://tomcat.apache.org/" --LogPath "[INSTALLFOLDER]logs" --Install "[#filC9AB73E4B36E50858FBDFA360FC9AD8D]" --Jvm "C:\Program Files\Java\jre7\bin\server\jvm.dll" --StartPath "[INSTALLFOLDER]" --StopPath "[INSTALLFOLDER]"'
+                  ExeCommand='//IS//Tomcat7 --DisplayName "$(var.ProductName)" --Description "Apache Tomcat 7.0.50 Server - http://tomcat.apache.org/" --LogPath "[INSTALLFOLDER]logs" --Install "[#filC9AB73E4B36E50858FBDFA360FC9AD8D]" --Jvm "[TARGETJREPATH]\bin\server\jvm.dll" --StartPath "[INSTALLFOLDER]" --StopPath "[INSTALLFOLDER]"'
                   Execute="deferred"
                   Return="check"
                   HideTarget="no"
@@ -87,6 +131,7 @@
 
   <Fragment>
     <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="TARGETJREPATH" />
       <Directory Id="$(var.PlatformProgramFilesFolder)">
         <Directory Id="INSTALLFOLDER" Name="Tomcat" />
       </Directory>
@@ -99,6 +144,9 @@
   <Fragment>
     <DirectoryRef Id="ApplicationProgramsFolder">
       <Component Id="ApplicationShortcut" Guid="AF948A75-B12D-4E2A-9DD1-F5F61503B7F3">
+        <util:XmlFile Id="SetHttpPort" Action="setValue"
+                      ElementPath="//Connector[\[]@protocol='HTTP/1.1'[\]]/@port" Value="[HTTPPORT]"
+                      File="[#fil3F06097D9E84BFA58F833C5FB59364E7]" SelectionLanguage="XPath" Sequence="1" />
         <Shortcut Id="MonitorTomcatShortcut"
                   Name="Monitor Tomcat"
                   Description="Monitor Tomcat"
