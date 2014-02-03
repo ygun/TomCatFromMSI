@@ -1,4 +1,4 @@
 TomCatFromMSI
 =============
 
-Apache Tomcat installer in MSI package
+Apache Tomcat installer MSI package
