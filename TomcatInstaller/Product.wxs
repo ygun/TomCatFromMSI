@@ -95,7 +95,7 @@
     </UI>
     <CustomAction Id="InstallService0"
                   FileKey="filC9AB73E4B36E50858FBDFA360FC9AD8D"
-                  ExeCommand='//IS//Tomcat7 --DisplayName "$(var.ProductName)" --Description "Apache Tomcat 7.0.50 Server - http://tomcat.apache.org/" --LogPath "[INSTALLFOLDER]logs" --Install "[#filC9AB73E4B36E50858FBDFA360FC9AD8D]" --Jvm "[TARGETJREPATH]\bin\server\jvm.dll"'
+                  ExeCommand='//IS//Tomcat7 --DisplayName "$(var.ProductName)" --Description "Apache Tomcat 7.0.50 Server - http://tomcat.apache.org/" --LogPath "[INSTALLFOLDER]logs" --Install "[#filC9AB73E4B36E50858FBDFA360FC9AD8D]" --Jvm "[TARGETJREPATH]\bin\client\jvm.dll"'
                   Execute="deferred"
                   Return="check"
                   HideTarget="no"
