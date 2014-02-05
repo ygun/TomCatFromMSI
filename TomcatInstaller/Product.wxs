@@ -30,6 +30,22 @@
     <Property Id="ARPPRODUCTICON" Value="TomcatIcon.ico" />
     <Property Id="HTTPPORT" Value="8080" />
     <Property Id="JREPATH" Value="TARGETJREPATH" />
+    <Property Id="CURRENTJREVER">
+      <RegistrySearch Id="FindExistingJre"
+                      Root="HKLM"
+                      Key="Software\JavaSoft\Java Runtime Environment"
+                      Name="CurrentVersion"
+                      Type="raw"
+                      Win64="$(var.Win64)" />
+    </Property>
+    <Property Id="TARGETJREPATH">
+      <RegistrySearch Id="FindExistingJrePath"
+                      Root="HKLM"
+                      Key="Software\JavaSoft\Java Runtime Environment\[CURRENTJREVER]"
+                      Name="JavaHome"
+                      Type="raw"
+                      Win64="$(var.Win64)" />
+    </Property>
     <UI>
       <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
       <Dialog Id="ErrorsDlg" Width="270" Height="70" Title="Error" NoMinimize="yes">
@@ -77,35 +93,49 @@
       <Publish Dialog="JrePathDlg" Control="Browse" Property="_BrowseProperty" Value="[JREPATH]" Order="1">1</Publish>
       <Publish Dialog="JrePathDlg" Control="Browse" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
     </UI>
+    <CustomAction Id="InstallService0"
+                  FileKey="filC9AB73E4B36E50858FBDFA360FC9AD8D"
+                  ExeCommand='//IS//Tomcat7 --DisplayName "$(var.ProductName)" --Description "Apache Tomcat 7.0.50 Server - http://tomcat.apache.org/" --LogPath "[INSTALLFOLDER]logs" --Install "[#filC9AB73E4B36E50858FBDFA360FC9AD8D]" --Jvm "[TARGETJREPATH]\bin\server\jvm.dll"'
+                  Execute="deferred"
+                  Return="check"
+                  HideTarget="no"
+                  Impersonate="no" />
     <CustomAction Id="InstallService1"
                   FileKey="filC9AB73E4B36E50858FBDFA360FC9AD8D"
-                  ExeCommand='//IS//Tomcat7 --DisplayName "$(var.ProductName)" --Description "Apache Tomcat 7.0.50 Server - http://tomcat.apache.org/" --LogPath "[INSTALLFOLDER]logs" --Install "[#filC9AB73E4B36E50858FBDFA360FC9AD8D]" --Jvm "[TARGETJREPATH]\bin\server\jvm.dll" --StartPath "[INSTALLFOLDER]" --StopPath "[INSTALLFOLDER]"'
+                  ExeCommand='//US//Tomcat7 --StartPath "[INSTALLFOLDER]\" '
                   Execute="deferred"
                   Return="check"
                   HideTarget="no"
                   Impersonate="no" />
     <CustomAction Id="InstallService2"
                   FileKey="filC9AB73E4B36E50858FBDFA360FC9AD8D"
-                  ExeCommand='//US//Tomcat7 --Startup auto'
+                  ExeCommand='//US//Tomcat7 --StopPath "[INSTALLFOLDER]\" '
                   Execute="deferred"
                   Return="check"
                   HideTarget="no"
                   Impersonate="no" />
     <CustomAction Id="InstallService3"
                   FileKey="filC9AB73E4B36E50858FBDFA360FC9AD8D"
-                  ExeCommand='//US//Tomcat7 --Classpath "[INSTALLFOLDER]bin\bootstrap.jar;[INSTALLFOLDER]bin\tomcat-juli.jar" --StartClass org.apache.catalina.startup.Bootstrap --StopClass org.apache.catalina.startup.Bootstrap --StartParams start --StopParams stop  --StartMode jvm --StopMode jvm'
+                  ExeCommand='//US//Tomcat7 --Startup auto'
                   Execute="deferred"
                   Return="check"
                   HideTarget="no"
                   Impersonate="no" />
     <CustomAction Id="InstallService4"
                   FileKey="filC9AB73E4B36E50858FBDFA360FC9AD8D"
-                  ExeCommand='//US//Tomcat7 --JvmOptions "-Dcatalina.home=[INSTALLFOLDER]#-Dcatalina.base=[INSTALLFOLDER]#-Djava.endorsed.dirs=[INSTALLFOLDER]endorsed#-Djava.io.tmpdir=[INSTALLFOLDER]temp#-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager#-Djava.util.logging.config.file=[INSTALLFOLDER]conf\logging.properties"'
+                  ExeCommand='//US//Tomcat7 --Classpath "[INSTALLFOLDER]bin\bootstrap.jar;[INSTALLFOLDER]bin\tomcat-juli.jar" --StartClass org.apache.catalina.startup.Bootstrap --StopClass org.apache.catalina.startup.Bootstrap --StartParams start --StopParams stop  --StartMode jvm --StopMode jvm'
                   Execute="deferred"
                   Return="check"
                   HideTarget="no"
                   Impersonate="no" />
     <CustomAction Id="InstallService5"
+                  FileKey="filC9AB73E4B36E50858FBDFA360FC9AD8D"
+                  ExeCommand='//US//Tomcat7 --JvmOptions "-Dcatalina.home=[INSTALLFOLDER]#-Dcatalina.base=[INSTALLFOLDER]#-Djava.endorsed.dirs=[INSTALLFOLDER]endorsed#-Djava.io.tmpdir=[INSTALLFOLDER]temp#-Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager#-Djava.util.logging.config.file=[INSTALLFOLDER]conf\logging.properties"'
+                  Execute="deferred"
+                  Return="check"
+                  HideTarget="no"
+                  Impersonate="no" />
+    <CustomAction Id="InstallService6"
                   FileKey="filC9AB73E4B36E50858FBDFA360FC9AD8D"
                   ExeCommand='//US//Tomcat7 --StdOutput auto --StdError auto'
                   Execute="deferred"
@@ -121,11 +151,13 @@
                   Impersonate="no" />
     <InstallExecuteSequence>
       <Custom Action="DelService" Before="RemoveFiles">REMOVE="ALL"</Custom>
+      <Custom Action="InstallService0" Before="InstallFinalize">NOT Installed</Custom>
       <Custom Action="InstallService1" Before="InstallFinalize">NOT Installed</Custom>
       <Custom Action="InstallService2" Before="InstallFinalize">NOT Installed</Custom>
       <Custom Action="InstallService3" Before="InstallFinalize">NOT Installed</Custom>
       <Custom Action="InstallService4" Before="InstallFinalize">NOT Installed</Custom>
       <Custom Action="InstallService5" Before="InstallFinalize">NOT Installed</Custom>
+      <Custom Action="InstallService6" Before="InstallFinalize">NOT Installed</Custom>
     </InstallExecuteSequence>
   </Product>
 
