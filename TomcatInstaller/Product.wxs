@@ -5,17 +5,20 @@
   <?define ProductName = "Apache Tomcat 7 (64 bit)" ?>
   <?define Win64 = "yes" ?>
   <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+  <?define SrcDir="Tomcat-x64/files" ?>
+  <?define JvmDir="server" ?>
   <?else ?>
   <?define ProductName = "Apache Tomcat 7" ?>
   <?define Win64 = "no" ?>
   <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+  <?define SrcDir="Tomcat-x86/files" ?>
+  <?define JvmDir="client" ?>
   <?endif ?>
 
   <?define ProductCode="*"?>
   <?define ProductVersion="7.0.50"?>
   <?define UpgradeCode="21B1DB59-CEAF-4425-AA7E-3508F0B3A2D7"?>
   <?define Manufacturer="Apache"?>
-  <?define SrcDir="Tomcat" ?>
   <Product Id="$(var.ProductCode)" Name="$(var.ProductName)" Language="1033" Version="$(var.ProductVersion)"
            Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
@@ -33,7 +36,7 @@
     <Property Id="CURRENTJREVER">
       <RegistrySearch Id="FindExistingJre"
                       Root="HKLM"
-                      Key="Software\JavaSoft\Java Development Kit"
+                      Key="Software\JavaSoft\Java Runtime Environment"
                       Name="CurrentVersion"
                       Type="raw"
                       Win64="$(var.Win64)" />
@@ -41,7 +44,7 @@
     <Property Id="TARGETJREPATH">
       <RegistrySearch Id="FindExistingJrePath"
                       Root="HKLM"
-                      Key="Software\JavaSoft\Java Development Kit\[CURRENTJREVER]"
+                      Key="Software\JavaSoft\Java Runtime Environment\[CURRENTJREVER]"
                       Name="JavaHome"
                       Type="raw"
                       Win64="$(var.Win64)" />
@@ -95,7 +98,7 @@
     </UI>
     <CustomAction Id="InstallService0"
                   FileKey="filC9AB73E4B36E50858FBDFA360FC9AD8D"
-                  ExeCommand='//IS//Tomcat7 --DisplayName "$(var.ProductName)" --Description "Apache Tomcat 7.0.50 Server - http://tomcat.apache.org/" --LogPath "[INSTALLFOLDER]logs" --Install "[#filC9AB73E4B36E50858FBDFA360FC9AD8D]" --Jvm "[TARGETJREPATH]jre\bin\server\jvm.dll"'
+                  ExeCommand='//IS//Tomcat7 --DisplayName "$(var.ProductName)" --Description "Apache Tomcat 7.0.50 Server - http://tomcat.apache.org/" --LogPath "[INSTALLFOLDER]logs" --Install "[#filC9AB73E4B36E50858FBDFA360FC9AD8D]" --Jvm "[TARGETJREPATH]bin\$(var.JvmDir)\jvm.dll"'
                   Execute="deferred"
                   Return="check"
                   HideTarget="no"
